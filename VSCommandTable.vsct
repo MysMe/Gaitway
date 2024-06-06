@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<Extern href="stdidcmd.h"/>
+	<Extern href="vsshlids.h"/>
+	<Include href="KnownImageIds.vsct"/>
+	<Include href="VSGlobals.vsct"/>
+
+	<Commands package="Gaitway">
+		<Groups>
+			<!-- Define a new group for the context menu -->
+			<Group guid="Gaitway" id="MyContextMenuGroup" priority="0x0600">
+				<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
+			</Group>
+		</Groups>
+
+		<Buttons>
+			<!-- Move the button to the context menu -->
+			<Button guid="Gaitway" id="WanderCommand" priority="0x0100" type="Button">
+				<Parent guid="Gaitway" id="MyContextMenuGroup" />
+				<Icon guid="ImageCatalogGuid" id="GoToSourceCode" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>Wander To</ButtonText>
+					<LocCanonicalName>.Gaitway.Wander</LocCanonicalName>
+				</Strings>
+			</Button>
+		</Buttons>
+	</Commands>
+
+	<Symbols>
+		<GuidSymbol name="Gaitway" value="{9e9f0f0d-bdcf-44e4-b320-4bee44d6d680}">
+			<!-- Define a new ID for the context menu group -->
+			<IDSymbol name="MyContextMenuGroup" value="0x0002" />
+			<IDSymbol name="WanderCommand" value="0x0100" />
+		</GuidSymbol>
+	</Symbols>
+</CommandTable>
