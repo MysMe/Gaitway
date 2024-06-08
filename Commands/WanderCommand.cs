@@ -2,14 +2,14 @@
 
 using EnvDTE;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
-using System.Threading.Tasks;
 using System.Linq;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Threading.Tasks;
 
 namespace Gaitway
 {
@@ -96,13 +96,7 @@ namespace Gaitway
                 }
 
                 //Extract the class from the statement (first whole word after @inject)
-                var className = injects.First().Split(' ').Skip(1).First();
-
-                //If this was a class identifier, we don't have a function to wander to
-                if (node.GetType() == typeof(IdentifierNameSyntax))
-                {
-                    return new SymbolName { Name = "", ContainerName = className };
-                }
+                var className = injects.First().Trim().Split(' ').Skip(1).First();
 
                 return new SymbolName { Name = node.ToString(), ContainerName = className };
             }
@@ -119,7 +113,7 @@ namespace Gaitway
                     //Get the syntax tree and semantic model for the document, and extract the symbol at the caret position
                     var syntaxNode = await document.GetSyntaxRootAsync().ConfigureAwait(true);
                     var semanticModel = await document.GetSemanticModelAsync().ConfigureAwait(true);
-                    var symbol =  (syntaxNode.FindToken(caretPosition).Parent, semanticModel);
+                    var symbol = (syntaxNode.FindToken(caretPosition).Parent, semanticModel);
                     return new SymbolName()
                     {
                         Name = symbol.Item1.ToString(),
