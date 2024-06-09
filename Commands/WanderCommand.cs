@@ -1,6 +1,4 @@
-﻿
-
-using EnvDTE;
+﻿using EnvDTE;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -35,10 +33,14 @@ namespace Gaitway
         {
             public string Name { get; set; }
             public string ContainerName { get; set; }
+
+            public bool Valid => !string.IsNullOrEmpty(ContainerName);
+            public string MessageBody => $"{ContainerName}.{Name}";
         }
 
-        private static async Task<SymbolName> GetTargetSymbolAsync(ITextView textView, IServiceProvider serviceProvider)
+        private static async Task<SymbolName> GetTargetSymbolAsync(IServiceProvider serviceProvider)
         {
+            var textView = GetTextView(serviceProvider);
             var caretPosition = textView.Caret.Position.BufferPosition;
 
             //For razor files, we have to manually parse the file
@@ -137,22 +139,33 @@ namespace Gaitway
                 return;
             }
 
-            var textView = GetTextView(ServiceProvider.GlobalProvider);
+            var symbol = await GetTargetSymbolAsync(ServiceProvider.GlobalProvider);
 
-            var symbol = await GetTargetSymbolAsync(textView, ServiceProvider.GlobalProvider);
-
-            //Note that the function name can be empty, in which case we just wander to the class
-            if (string.IsNullOrEmpty(symbol.ContainerName))
+            if (!symbol.Valid)
             {
                 await VS.StatusBar.ShowMessageAsync("Unable To Wander - No Symbol Found!");
                 return;
             }
 
-            await PipeLink.Instance?.SendMessageAsync($"{symbol.ContainerName}.{symbol.Name}");
+            await PipeLink.Instance?.SendMessageAsync(symbol.MessageBody);
 
             await VS.StatusBar.EndAnimationAsync(StatusAnimation.Sync);
 
             await VS.StatusBar.ShowMessageAsync("Request Sent!");
+        }
+
+        protected override void BeforeQueryStatus(EventArgs e)
+        {
+            base.BeforeQueryStatus(e);
+
+            var potentialSymbol = ThreadHelper.JoinableTaskFactory.Run(async () =>
+            {
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                return await GetTargetSymbolAsync(ServiceProvider.GlobalProvider);
+            });
+
+            Command.Visible = Command.Enabled = potentialSymbol.Valid;
+            Command.Text = string.IsNullOrEmpty(potentialSymbol.Name) ? "Wander To Class" : "Wander To Method";
         }
     }
 }

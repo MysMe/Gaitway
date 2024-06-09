@@ -20,6 +20,8 @@
 				<Parent guid="Gaitway" id="MyContextMenuGroup" />
 				<Icon guid="ImageCatalogGuid" id="GoToSourceCode" />
 				<CommandFlag>IconIsMoniker</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>TextChanges</CommandFlag>
 				<Strings>
 					<ButtonText>Wander To</ButtonText>
 					<LocCanonicalName>.Gaitway.Wander</LocCanonicalName>
