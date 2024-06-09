@@ -138,6 +138,11 @@ namespace Gaitway
                 await VS.StatusBar.ShowMessageAsync("Unable To Wander - Listener isn't running!");
                 return;
             }
+            if (!PipeLink.Instance.Connected)
+            {
+                await VS.StatusBar.ShowMessageAsync("Unable To Wander - No Clients To Wander To!");
+                return;
+            }
 
             var symbol = await GetTargetSymbolAsync(ServiceProvider.GlobalProvider);
 

@@ -76,6 +76,8 @@ namespace Gaitway
             await WriteStream.FlushAsync();
         }
 
+        public bool IsConnected => Connection.IsConnected;
+
         public void Dispose()
         {
             TokenSource.Cancel();
@@ -148,6 +150,7 @@ namespace Gaitway
                     await client.SendMessageAsync(message);
             }
         }
+        public bool Connected => clients.Count != 0;
         public void Dispose()
         {
             WaitTokenSource.Cancel();
@@ -179,7 +182,7 @@ namespace Gaitway
         {
             await connection.SendMessageAsync(message);
         }
-
+        public bool Connected => connection.IsConnected;
         public void Dispose()
         {
             connection.Dispose();
@@ -220,6 +223,8 @@ namespace Gaitway
         {
             await (server?.StartListeningAsync() ?? Task.CompletedTask);
         }
+
+        public bool Connected => server?.Connected ?? client!.Connected;
 
         public void Dispose()
         {
