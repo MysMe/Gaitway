@@ -22,6 +22,9 @@ namespace Gaitway
         {
         }
 
+        [DllImport("user32.dll")]
+        static extern bool SetForegroundWindow(IntPtr hWnd);
+
         #region Package Members
 
         //Invoked when we receive a wander command
@@ -68,16 +71,9 @@ namespace Gaitway
             {
                 window.Activate();
                 window.SetFocus();
-
-                //Adjusting the window state forces it to the foreground, so we swap it and then revert it
-                var originalState = window.WindowState;
-                //Assume it was maximised if we're bringing it up from minimised, we can't know the actual state from here
-                if (originalState == vsWindowState.vsWindowStateMaximize)
-                {
-                    window.WindowState = vsWindowState.vsWindowStateMaximize;
-                }
-                window.WindowState = originalState == vsWindowState.vsWindowStateNormal ? vsWindowState.vsWindowStateMaximize : vsWindowState.vsWindowStateNormal;
-                window.WindowState = originalState;
+                //Delay here so the prior commands take effect
+                await Task.Delay(100);
+                SetForegroundWindow(window.HWnd);
             }
             dte.ExecuteCommand("Edit.GoTo", point.Line.ToString());
         }
