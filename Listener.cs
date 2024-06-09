@@ -89,6 +89,10 @@ namespace Gaitway
             {
                 //The function name (if provided) will have been postfixed with "Async", so we must remove it
                 methodName = methodName.Substring(0, methodName.Length - 5);
+
+                //If the function ends with any numbers, remove them
+                char[] digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+                methodName = methodName.TrimEnd(digits);
             }
 
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
