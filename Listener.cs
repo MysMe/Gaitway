@@ -22,8 +22,24 @@ namespace Gaitway
         {
         }
 
-        [DllImport("user32.dll")]
-        static extern bool SetForegroundWindow(IntPtr hWnd);
+        const int SW_RESTORE = 9;
+
+        [System.Runtime.InteropServices.DllImport("User32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr handle);
+        [System.Runtime.InteropServices.DllImport("User32.dll")]
+        private static extern bool ShowWindow(IntPtr handle, int nCmdShow);
+        [System.Runtime.InteropServices.DllImport("User32.dll")]
+        private static extern bool IsIconic(IntPtr handle);
+
+        public static void BringProcessToFront(IntPtr handle)
+        {
+            if (IsIconic(handle))
+            {
+                ShowWindow(handle, SW_RESTORE);
+            }
+
+            SetForegroundWindow(handle);
+        }
 
         #region Package Members
 
@@ -32,6 +48,16 @@ namespace Gaitway
         {
             try
             {
+                //If the content starts with a +, it is a response to a wander command and we want to move that process to the foreground
+                if (content.StartsWith("+"))
+                {
+                    var windowHandle = content.Substring(1);
+                    IntPtr handle = new IntPtr(int.Parse(windowHandle));
+                    //Only the current foreground process is allowed to do this, hence we have to do it as a response
+                    BringProcessToFront(handle);
+                    return;
+                }
+
                 await VS.StatusBar.StartAnimationAsync(StatusAnimation.Sync);
                 await VS.StatusBar.ShowMessageAsync("Received Wander: " + content);
                 var words = content.Split('.');
@@ -71,9 +97,7 @@ namespace Gaitway
             {
                 window.Activate();
                 window.SetFocus();
-                //Delay here so the prior commands take effect
-                await Task.Delay(100);
-                SetForegroundWindow(window.HWnd);
+                await PipeLink.Instance.SendMessageAsync($"+{window.HWnd}");
             }
             dte.ExecuteCommand("Edit.GoTo", point.Line.ToString());
         }

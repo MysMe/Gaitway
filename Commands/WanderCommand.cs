@@ -163,6 +163,12 @@ namespace Gaitway
         {
             base.BeforeQueryStatus(e);
 
+            if (PipeLink.Instance == null || !PipeLink.Instance.Connected)
+            {
+                Command.Visible = Command.Enabled = false;
+                return;
+            }
+
             var potentialSymbol = ThreadHelper.JoinableTaskFactory.Run(async () =>
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
